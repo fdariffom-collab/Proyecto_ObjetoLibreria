@@ -12,12 +12,23 @@ class Library:
     
     def prestarLibro(self,nomLibro,nomCliente):
         if nomLibro in self.listaLibros:
-            if nomLibro not in self.registroPrestamo.keys():
+            if nomLibro in self.registroPrestamo.keys():
+                print(f'Lo sentimos, ese libro ha sido prestado a {self.registroPrestamo[nomLibro]}. No se encuentra disponible.  ')
+            else:
                 self.registroPrestamo.update({nomLibro:nomCliente})
                 print(f'Gracias {nomCliente} por usar nuestra biblioteca. Prestamo exitoso. ')
-            else:
-                print(f'Lo sentimos, ese libro ha sido prestado a {self.registroPrestamo[nomLibro]}. No se encuentra disponible.  ')
-        else:
+                #La siguiente parte de este bloque es una de las sugerencias de mejoras de codigo
+                #La idea es generar una base de datos para los libros en prestamo
+                archivoPrestamo=open('detallesPrestamos.txt','w')#Crea o sobrescribe el archivo de texto como base de datos.
+                for i in self.registroPrestamo.items():
+                    titulo=i[0]
+                    cliente=i[1]
+                    archivoPrestamo.write(titulo)
+                    archivoPrestamo.write(' ')
+                    archivoPrestamo.write(cliente)
+                    archivoPrestamo.write('\n')
+                archivoPrestamo.close()
+        else:  
             print(f'¡Ups! {nomLibro} no está en nuestros registros. Intenta otra opción. ')
 
 
@@ -40,6 +51,26 @@ class Library:
         else:
             print('Ups, parece haber un error. Ese libro no puede ser devuelto.')
 
+    #Este metodo es para obtener una lista de los libros prestados y los usuarios que los solicitaron
+    #Es parte de las mejoras sugeridas para el proyecto.
+    def listaPrestamo(self):
+        for libro in self.registroPrestamo.items():
+            print(libro)
+        
+    #Metodo de eliminacion de libro de la base de datos y del codigo: Mejoras sugeridas en el proyecto
+    def eliminarLibro(self,nomLibro):
+        if nomLibro in self.listaLibros:
+            self.listaLibros.remove(nomLibro)
+            print('Libro eliminado con éxito. La base de datos ha sido actualizada.')
+            actdatos=open(archivoBase,'w')
+            for libro in self.listaLibros:
+                actdatos.write(libro)
+                actdatos.write('\n')
+            actdatos.close()
+        else:
+            print('Lo sentimos, ese libro no se encuentra en nuestras existencias.')
+            
+
 #Ahora el desarrollo del menu
 def main():
     control=True
@@ -50,18 +81,19 @@ def main():
         2. Solicitar préstamo
         3. Añadir un libro
         4. Devolver un Libro
+        5. Ver la lista de libros prestados por usuario
+        6. Eliminar un Libro
         """)
         user_elec=str(input('Elige C para continuar o X para cancelar: ')).upper()
         if user_elec=="C":
-            user_elec2=int(input('Por favor, ingrese una opción de la 1 a la 4 de las enlistadas: '))
+            user_elec2=int(input('Por favor, ingrese una opción de la 1 a la 6 de las enlistadas: '))
 
             if user_elec2==1:
-                print('Los libros de nuestra biblioteca son: ')
                 objLibreria.verLista()
 
             elif user_elec2==2:
                 nomCliente=str(input('Ingrese el nombre del solicitante: '))
-                nomLibro=str(input('Ingrese el título del libro que desea solicitar para préstamo: '))
+                nomLibro=input('Ingrese el título del libro que desea solicitar para préstamo: ')
                 objLibreria.prestarLibro(nomLibro,nomCliente)
             
             elif user_elec2==3:
@@ -73,8 +105,19 @@ def main():
                 print('Para devolver un libro, ingrese el nombre del ejemplar: ')
                 nomLibro=str(input('Título: '))
                 objLibreria.devolverLibro(nomLibro)
+
+            elif user_elec2==5:
+                print('A continuación los libros que se encuentran en préstamo con el nombre del usuario que los ha solicitado: ')
+                objLibreria.listaPrestamo()
+
+            elif user_elec2==6:
+                print('Para eliminar un libro, ingrese el nombre del ejemplar:')
+                nomLibro=str(input('Título: '))
+                objLibreria.eliminarLibro(nomLibro)
+
             else:
                 print('Por favor, elija una opción válida .')
+
         elif user_elec=="X":
             control=False
         else:
@@ -88,10 +131,18 @@ if __name__=='__main__':
     archivolibros=open(archivoBase,"r")
     for libro in archivolibros:
         listaLibros.append(libro)
+    archivolibros.close()
 #La creacion del objeto libreria
 objLibreria=Library(nombreLibrary,listaLibros)
 main()
 #A continuacion las mejoras que se proponen para el codigo:
 #Implementar base de datos (al igual que la listas de libros) para los libros prestados
-#Agregar metodo para que devuelva el registro de todos los libros prestados con el nombre de la persona de quien ha solicitado el prestamo
+#Hecho
+#Agregar un metodo para que devuelva el registro de todos los libros prestados con el nombre de la persona que los solicito
+#Hecho
 #Implementar un metodo para eliminar un libro
+#Hecho
+#Me falta modificar el bloque de codigo para devolver un libro y sobrescribir la base de datos de libros prestados
+#Y donde se creo ese archivo?
+#Arreglar el archivo .txt de la lista de libros porque no me reconoce los libros al solicitar el prestamo, solo reconoce el ultimo libro de la lista.
+#Poner condicion para no eliminar un libro si es que este se encuentra prestado
