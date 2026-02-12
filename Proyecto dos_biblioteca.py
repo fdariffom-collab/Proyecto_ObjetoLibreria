@@ -12,22 +12,21 @@ class Library:
     
     def prestarLibro(self,nomLibro,nomCliente):
         if nomLibro in self.listaLibros:
-            if nomLibro in self.registroPrestamo.keys():
-                print(f'Lo sentimos, ese libro ha sido prestado a {self.registroPrestamo[nomLibro]}. No se encuentra disponible.  ')
-            else:
+            if nomLibro not in self.registroPrestamo.keys():
                 self.registroPrestamo.update({nomLibro:nomCliente})
                 print(f'Gracias {nomCliente} por usar nuestra biblioteca. Prestamo exitoso. ')
                 #La siguiente parte de este bloque es una de las sugerencias de mejoras de codigo
                 #La idea es generar una base de datos para los libros en prestamo
                 archivoPrestamo=open('detallesPrestamos.txt','w')#Crea o sobrescribe el archivo de texto como base de datos.
                 for i in self.registroPrestamo.items():
-                    titulo=i[0]
-                    cliente=i[1]
-                    archivoPrestamo.write(titulo)
-                    archivoPrestamo.write(' ')
-                    archivoPrestamo.write(cliente)
+                    prestLibro=i[0]
+                    prestCliente=i[1]
+                    libroUsuario=str(' , '.join([prestLibro,prestCliente]))
+                    archivoPrestamo.write(libroUsuario)
                     archivoPrestamo.write('\n')
-                archivoPrestamo.close()
+                    archivoPrestamo.close()
+            else:
+                print(f'Lo sentimos, ese libro ha sido prestado a {self.registroPrestamo[nomLibro]}. No se encuentra disponible.  ')       
         else:  
             print(f'¡Ups! {nomLibro} no está en nuestros registros. Intenta otra opción. ')
 
@@ -48,6 +47,15 @@ class Library:
         if nomLibro in self.registroPrestamo.keys():
             print(f'Hola {self.registroPrestamo.get(nomLibro)}! Gracias por la devolución del libro {nomLibro}.')
             self.registroPrestamo.pop(nomLibro)
+            archivoPrestamo=open('detallesPrestamos.txt','w')#Crea o sobrescribe el archivo de texto como base de datos.
+            for i in self.registroPrestamo.items():
+                titulo=i[0]
+                cliente=i[1]
+                archivoPrestamo.write(titulo)
+                archivoPrestamo.write(' ')
+                archivoPrestamo.write(cliente)
+                archivoPrestamo.write('\n')
+                archivoPrestamo.close()
         else:
             print('Ups, parece haber un error. Ese libro no puede ser devuelto.')
 
@@ -59,7 +67,9 @@ class Library:
         
     #Metodo de eliminacion de libro de la base de datos y del codigo: Mejoras sugeridas en el proyecto
     def eliminarLibro(self,nomLibro):
-        if nomLibro in self.listaLibros:
+        if nomLibro in self.registroPrestamo.keys():
+            print('Lo sentimos, este libro no se puede eliminar. Está en estado de préstamo.')
+        elif nomLibro in self.listaLibros:
             self.listaLibros.remove(nomLibro)
             print('Libro eliminado con éxito. La base de datos ha sido actualizada.')
             actdatos=open(archivoBase,'w')
@@ -93,7 +103,7 @@ def main():
 
             elif user_elec2==2:
                 nomCliente=str(input('Ingrese el nombre del solicitante: '))
-                nomLibro=input('Ingrese el título del libro que desea solicitar para préstamo: ')
+                nomLibro=str(input('Ingrese el título del libro que desea solicitar para préstamo: '))
                 objLibreria.prestarLibro(nomLibro,nomCliente)
             
             elif user_elec2==3:
@@ -130,19 +140,7 @@ if __name__=='__main__':
     archivoBase=str(input('Ingresa el nombre de tu archivo de texto con la extensión de archivo .txt : '))
     archivolibros=open(archivoBase,"r")
     for libro in archivolibros:
-        listaLibros.append(libro)
-    archivolibros.close()
+        listaLibros.append(libro.strip())
 #La creacion del objeto libreria
 objLibreria=Library(nombreLibrary,listaLibros)
 main()
-#A continuacion las mejoras que se proponen para el codigo:
-#Implementar base de datos (al igual que la listas de libros) para los libros prestados
-#Hecho
-#Agregar un metodo para que devuelva el registro de todos los libros prestados con el nombre de la persona que los solicito
-#Hecho
-#Implementar un metodo para eliminar un libro
-#Hecho
-#Me falta modificar el bloque de codigo para devolver un libro y sobrescribir la base de datos de libros prestados
-#Y donde se creo ese archivo?
-#Arreglar el archivo .txt de la lista de libros porque no me reconoce los libros al solicitar el prestamo, solo reconoce el ultimo libro de la lista.
-#Poner condicion para no eliminar un libro si es que este se encuentra prestado
